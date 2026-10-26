@@ -1,0 +1,15 @@
+{
+  "name": "Vaada & Associates – Billing",
+  "short_name": "Vaada Bills",
+  "description": "Professional fee invoices for Vaada and Associates, Chartered Accountants",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f4f0",
+  "theme_color": "#2f2d2b",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

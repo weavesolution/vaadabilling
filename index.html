@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Vaada Billing</title>
+<meta name="theme-color" content="#2f2d2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vaada Bills">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="images/icon-192.png">
+<link rel="apple-touch-icon" href="images/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+[hidden]{display:none!important}
+:root{
+  --ink:#2f2d2b; --ink2:#5d5853; --taupe:#8b7765; --taupe-l:#efe9e2;
+  --bg:#f7f4f0; --card:#fff; --line:#e7e1d9; --ok:#3d7a57; --bad:#b4443a; --warn:#b7791f;
+  --r:14px; --sh:0 1px 2px rgba(47,45,43,.06),0 4px 14px rgba(47,45,43,.05);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none}
+body{-webkit-user-select:none;user-select:none}
+input,textarea,select{-webkit-user-select:text;user-select:text}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+
+/* Header */
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:10px 12px 10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:rgba(247,244,240,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand-logo{height:34px;width:auto;margin-right:4px}
+.brand{flex:1;display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand b{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;letter-spacing:.3px;white-space:nowrap}
+.brand small{color:var(--taupe);font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+.icon-btn{border:0;background:transparent;padding:8px;border-radius:10px;color:var(--ink2);cursor:pointer;line-height:0}
+.icon-btn:active{background:var(--taupe-l)}
+.sync{position:relative;border:0;background:transparent;padding:8px;border-radius:10px;color:var(--ink2);cursor:pointer;line-height:0}
+.sync i{position:absolute;right:6px;bottom:8px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--bg);background:#bbb}
+.sync.ok i{background:var(--ok)} .sync.err i,.sync.offline i{background:var(--warn)} .sync.off{opacity:.55}
+.sync.busy svg{animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.35}}
+
+/* Bottom nav */
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bottom button{flex:1;max-width:140px;border:0;background:none;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#9a928a;font-size:11.5px;font-weight:600;cursor:pointer}
+.bottom svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bottom button.on{color:var(--ink)}
+.bottom button.on svg{stroke:var(--taupe)}
+
+/* Layout */
+main{padding:14px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh)}
+.card h3{margin:0 0 10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--taupe);display:flex;justify-content:space-between;align-items:center}
+.card h3 .link{text-transform:none;letter-spacing:0}
+label{display:block;font-size:12.5px;color:var(--ink2);font-weight:500;margin-bottom:10px}
+input,select,textarea{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fdfcfa;font-size:16px;outline:none;transition:border .15s;-webkit-appearance:none;appearance:none}
+select{background:#fdfcfa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b7765' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:32px}
+input:focus,select:focus,textarea:focus{border-color:var(--taupe);background-color:#fff}
+input[readonly]{background:var(--taupe-l);color:var(--ink2)}
+textarea{resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.muted{color:#9a928a;font-size:13px}
+.center{text-align:center}
+.link{background:none;border:0;color:var(--taupe);font-weight:600;cursor:pointer;padding:0;font-size:13px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--taupe-l);color:var(--ink2);margin:-2px 0 10px}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:20px;background:var(--taupe-l);color:var(--ink2);text-transform:uppercase;letter-spacing:.4px;vertical-align:1px}
+.tag.red{background:#f6e3e1;color:var(--bad)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px 14px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.wa{background:#1f9d55;border-color:#1f9d55;color:#fff}
+.danger{color:var(--bad)}
+.sm{padding:7px 12px;font-size:13px;border-radius:9px}
+.block{width:100%;padding:14px;font-size:16px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .btn{flex:1}
+.fab{position:fixed;right:max(16px,calc(50% - 264px));bottom:calc(84px + env(safe-area-inset-bottom));z-index:4;border:0;background:var(--ink);color:#fff;border-radius:16px;padding:13px 18px;font-weight:600;box-shadow:0 6px 20px rgba(47,45,43,.25);cursor:pointer}
+
+/* Banners */
+.banner{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;box-shadow:var(--sh)}
+.banner img{width:40px;height:40px;border-radius:10px}
+.banner div{flex:1;display:flex;flex-direction:column;line-height:1.3}
+.banner small{color:#9a928a;font-size:12.5px}
+.banner.warn{background:#fdf7ec;border-color:#f0e0bf}
+
+/* Segmented */
+.seg{display:flex;background:var(--taupe-l);border-radius:11px;padding:3px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* Typeahead */
+.ta{position:relative}
+.ta-list{position:absolute;left:0;right:0;top:calc(100% - 6px);z-index:8;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(47,45,43,.16);max-height:300px;overflow:auto;padding:4px}
+.ta-list[hidden]{display:none}
+.ta-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer}
+.ta-item:hover,.ta-item.hl{background:var(--taupe-l)}
+.ta-item .grow{flex:1;min-width:0}
+.ta-item b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ta-item b mark{background:#f3e6c9;color:inherit;border-radius:3px}
+.ta-item small{color:#9a928a;font-size:12px}
+.ta-head{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#9a928a;padding:6px 10px 2px}
+.avatar.s{width:30px;height:30px;font-size:12px}
+
+/* Service picker */
+.svc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;transition:border .15s,background .15s}
+.svc.on{border-color:var(--taupe);background:#fcfaf7}
+.svc .chk{display:flex;align-items:center;gap:10px;margin:0;cursor:pointer;color:var(--ink)}
+.svc .chk input{width:20px;height:20px;margin:0;accent-color:var(--ink);flex:none;-webkit-appearance:checkbox;appearance:auto}
+.svc .chk span{flex:1;display:flex;flex-direction:column}
+.svc .chk b{font-weight:600;font-size:14.5px}
+.svc .chk small{color:#9a928a;font-size:12px}
+.svc .rate{font-weight:600;font-size:13px;color:var(--ink2)}
+.svc .more{display:none;grid-template-columns:2fr 1fr;gap:8px;margin-top:8px}
+.svc.on .more{display:grid}
+.svc .more input{margin:0;padding:8px 10px}
+
+/* Summary */
+.sum div{display:flex;justify-content:space-between;padding:3px 0;font-size:14px;color:var(--ink2)}
+.sum .total{font-size:18px;font-weight:700;color:var(--ink);border-top:1px dashed var(--line);margin-top:6px;padding-top:8px}
+.sum .net{font-weight:700;color:var(--ink)}
+.sum .note{font-size:12px;color:#9a928a;justify-content:flex-start}
+
+/* Lists */
+.search{margin:0 0 12px}
+.item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.item:active{background:#fcfaf7}
+.item .grow{flex:1;min-width:0}
+.item .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .s{font-size:12.5px;color:#9a928a}
+.item .amt{font-weight:700;text-align:right;white-space:nowrap}
+.item .amt small{display:block;font-weight:500;font-size:11.5px;color:#9a928a}
+.item.cx{background:#faf8f6}
+.item.cx .t,.item.cx .amt{text-decoration:line-through;color:#a49c94}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--taupe-l);color:var(--taupe);display:grid;place-items:center;font-weight:700;flex:none}
+.empty{text-align:center;padding:40px 20px;color:#9a928a}
+.dr{color:var(--bad)} .cr{color:var(--ok)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat small{display:block;font-size:11.5px;color:#9a928a;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat b{font-size:17px}
+
+/* Switch */
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink);font-size:14.5px;font-weight:500;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .knob{flex:none;width:44px;height:26px;border-radius:20px;background:#d9d2c9;position:relative;transition:.2s}
+.switch .knob::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s}
+.switch input:checked+.knob{background:var(--ink)}
+.switch input:checked+.knob::after{left:21px}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(30,28,26,.45);display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.modal.hidden{display:none}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:6px 16px calc(18px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+.sheet-h{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;z-index:2}
+.sheet-h h3{margin:0;font-size:17px}
+@keyframes up{from{transform:translateY(40px);opacity:.5}}
+@keyframes fade{from{opacity:0}}
+.preview{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.tx{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tx:last-child{border:0}
+.tx.cx span{text-decoration:line-through;color:#a49c94}
+
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+
+/* Weave credit (settings only) */
+.weave{display:flex;flex-direction:column;align-items:center;gap:6px;margin:28px auto 6px;color:#9a928a;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;text-decoration:none;width:max-content}
+.weave img{height:46px;width:auto;transition:filter .2s,transform .2s}
+.weave:hover img,.weave:active img{filter:brightness(.78)}
+.weave:hover img{transform:translateY(-1px)}
+
+/* Invoice details */
+.dt-name{font-size:18px;font-weight:700;margin-bottom:2px}
+.dt-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;color:var(--ink2)}
+.dt-total{font-weight:700;font-size:16px}
+.cxcard{background:#fbf3f2;border-color:#f0d6d3}
+.cxcard .dt-name{text-decoration:line-through;color:#a49c94}
+
+/* Device lock */
+#lock{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.lock-in{width:100%;max-width:340px;text-align:center}
+.lock-logo{width:150px;height:auto;margin-bottom:6px}
+.lock-in h2{font:700 26px 'Cormorant Garamond',Georgia,serif;margin:0 0 4px}
+.lock-in input{text-align:center;font-size:20px;letter-spacing:4px;margin:18px 0 12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <img src="images/logo.png" class="brand-logo" alt="">
+    <div class="brand"><b>Vaada &amp; Associates</b><small id="pageTitle">New Bill</small></div>
+    <button class="sync off" id="syncBtn" aria-label="Cloud sync" title="Cloud sync">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5H7z"/></svg><i></i>
+    </button>
+    <button class="icon-btn" id="btnSettings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+
+  <main id="view"></main>
+
+  <nav class="bottom">
+    <button data-go="bill" class="on">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Bill</span></button>
+    <button data-go="invoices">
+      <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Invoices</span></button>
+    <button data-go="customers">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c1.8.7 3 2.4 3.5 5.2"/></svg><span>Customers</span></button>
+    <button data-go="services">
+      <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/></svg><span>Services</span></button>
+  </nav>
+</div>
+
+<div id="modal" class="modal hidden"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* Vaada & Associates – Billing PWA · v2.0 · Built by Weave Solutions (https://weavesolution.com/) */
+const VERSION = '3.0';
+const KEY = 'vaada_billing_v2', LKEY = 'vaada_device_v2', OLDKEY = 'vaada_billing_v1';
+const SYNC_URL = 'https://script.google.com/macros/s/AKfycbxeKOrXZR9XOkMPjDSXM6Uz3a9sZtz97uzZ6XK3ZPniFpRD74O1fhXW_-CvqlWpbbcp/exec';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const r2 = n => Math.round((+n || 0) * 100) / 100;
+const money = n => r2(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const rs = n => '₹' + money(n);
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const todayISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const fmtDate = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${+d}-${MON[m - 1]}-${y}`; };
+const fyOf = iso => { const [y, m] = iso.split('-').map(Number); const s = m >= 4 ? y : y - 1; return `${s}-${String((s + 1) % 100).padStart(2, '0')}`; };
+const drcr = n => `${money(Math.abs(n))} ${n < 0 ? 'Cr' : 'Dr'}`;
+const initials = s => (s || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const PAY = { cash: 'Cash', credit: 'Credit', partial: 'Partial' };
+
+const STATES = [['01', 'Jammu and Kashmir'], ['02', 'Himachal Pradesh'], ['03', 'Punjab'], ['04', 'Chandigarh'], ['05', 'Uttarakhand'], ['06', 'Haryana'], ['07', 'Delhi'], ['08', 'Rajasthan'], ['09', 'Uttar Pradesh'], ['10', 'Bihar'], ['11', 'Sikkim'], ['12', 'Arunachal Pradesh'], ['13', 'Nagaland'], ['14', 'Manipur'], ['15', 'Mizoram'], ['16', 'Tripura'], ['17', 'Meghalaya'], ['18', 'Assam'], ['19', 'West Bengal'], ['20', 'Jharkhand'], ['21', 'Odisha'], ['22', 'Chhattisgarh'], ['23', 'Madhya Pradesh'], ['24', 'Gujarat'], ['26', 'Dadra and Nagar Haveli and Daman and Diu'], ['27', 'Maharashtra'], ['29', 'Karnataka'], ['30', 'Goa'], ['31', 'Lakshadweep'], ['32', 'Kerala'], ['33', 'Tamil Nadu'], ['34', 'Puducherry'], ['35', 'Andaman and Nicobar Islands'], ['36', 'Telangana'], ['37', 'Andhra Pradesh'], ['38', 'Ladakh'], ['97', 'Other Territory']];
+const stateByCode = c => (STATES.find(s => s[0] === c) || [])[1] || '';
+const codeOf = n => (STATES.find(s => s[1] === n) || [])[0] || '';
+const stateOpts = sel => `<option value="">— Select state —</option>` + STATES.map(([, n]) => `<option${n === sel ? ' selected' : ''}>${n}</option>`).join('');
+
+const DEF_SETTINGS = {
+  id: 'settings', updatedAt: 0,
+  firm: 'Vaada and Associates', tagline: 'Chartered Accountants',
+  address: "Teacher's Colony, Kota, Raipur, C.G. 492001",
+  email: '', phone: '', pan: '', gstin: '', state: 'Chhattisgarh', gstRate: 18,
+  bank: '', acno: '', ifsc: '', prefix: 'VA', showPrev: true,
+  terms: 'Subject to Raipur Jurisdiction.',
+  waMsg: 'Dear {name},\nPlease find attached invoice {no} dated {date} for {amount}.\nThank you,\n{firm}'
+};
+const DEF_SERVICES = [
+  ['Income Tax Return Filing', 'ITR filing for the assessment year', '998231', 2000],
+  ['GST Return Filing', 'GSTR-1 & GSTR-3B', '998231', 1500],
+  ['Audit Fees', 'Tax / statutory audit', '998221', 10000],
+  ['Accounting & Bookkeeping', 'Monthly accounting', '998222', 3000],
+  ['TDS Return Filing', 'Quarterly TDS return', '998231', 1500],
+  ['ROC / Company Compliance', 'Annual filings with MCA', '998221', 5000],
+  ['Professional Consultation', '', '998231', 1000]
+].map(([name, desc, sac, rate], i) => ({ id: 's' + (i + 1), updatedAt: 0, name, desc, sac, rate }));
+const FIRM_KEYS = ['firm', 'tagline', 'address', 'email', 'phone', 'pan', 'gstin', 'state', 'bank', 'acno', 'ifsc', 'terms', 'showPrev'];
+const CF = ['name', 'address', 'city', 'state', 'pincode', 'phone', 'email', 'pan', 'gstin'];
+const cleanCust = c => Object.fromEntries(CF.map(k => [k, String(c[k] || '').trim()]));
+
+/* ---------- Storage ---------- */
+let db = load();
+if (/\{link\}/.test(db.settings.waMsg || '')) db.settings.waMsg = db.settings.waMsg.replace(/^.*\{link\}.*(\n|$)/m, '');
+let dev = loadDev();
+function fresh() { return { settings: { ...DEF_SETTINGS }, services: DEF_SERVICES.map(s => ({ ...s })), customers: [], invoices: [], payments: [] }; }
+function load() {
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d) return { ...fresh(), ...d, settings: { ...DEF_SETTINGS, ...d.settings } }; } catch (e) {}
+  try {
+    const o = JSON.parse(localStorage.getItem(OLDKEY));
+    if (o) { // migrate v1 → v2
+      const now = Date.now(), d = fresh();
+      Object.assign(d.settings, o.settings || {}, { id: 'settings', updatedAt: now, terms: `Subject to ${(o.settings || {}).jurisdiction || 'Raipur'} Jurisdiction.`, state: 'Chhattisgarh' });
+      d.services = (o.services || []).map(s => ({ ...s, updatedAt: now }));
+      d.customers = (o.customers || []).map(c => ({ ...c, state: c.state || 'Chhattisgarh', updatedAt: now }));
+      d.invoices = (o.invoices || []).map(i => ({ ...i, status: 'active', payMode: 'credit', received: 0, updatedAt: now }));
+      d.payments = (o.payments || []).map(p => ({ ...p, updatedAt: now }));
+      return d;
+    }
+  } catch (e) {}
+  return fresh();
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('Could not save – phone storage may be full'); } }
+function loadDev() {
+  let d = {}; try { d = JSON.parse(localStorage.getItem(LKEY)) || {}; } catch (e) {}
+  return { key: '', lastPull: 0, lastSync: 0, dirty: {}, iosHint: false, ...d };
+}
+function saveDev() { try { localStorage.setItem(LKEY, JSON.stringify(dev)); } catch (e) {} }
+function touch(t, rec) { rec.updatedAt = Date.now(); dev.dirty[t + ':' + rec.id] = 1; saveDev(); save(); scheduleSync(); }
+function getRec(t, id) { return t === 'settings' ? db.settings : (db[t] || []).find(x => x.id === id); }
+const live = t => db[t].filter(x => !x.deleted);
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+/* ---------- Cloud sync (Google Sheet via Apps Script) ---------- */
+const syncReady = () => !!dev.key;
+let syncP = null, syncTimer = null, needRender = false, lastErr = '';
+function scheduleSync(ms = 1500) { if (!syncReady()) return; clearTimeout(syncTimer); syncTimer = setTimeout(sync, ms); }
+async function api(body, ms = 25000) {
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms);
+  try {
+    const r = await fetch(SYNC_URL, { method: 'POST', body: JSON.stringify({ ...body, key: dev.key }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ac.signal, redirect: 'follow' });
+    let j; try { j = await r.json(); } catch (e) { throw new Error('Google Sheet did not respond – try again'); }
+    if (!j.ok) { if (j.auth) lockDevice(); throw new Error(j.error || 'Sync failed'); }
+    return j;
+  } catch (e) { if (e.name === 'AbortError') throw new Error('Sync timed out'); if (e instanceof TypeError) throw new Error(navigator.onLine === false ? 'You are offline' : 'Could not reach the Sheet'); throw e; }
+  finally { clearTimeout(t); }
+}
+function sync() {
+  if (!syncReady()) { setSync('off'); return Promise.resolve(false); }
+  if (syncP) return syncP;
+  clearTimeout(syncTimer);
+  syncP = (async () => {
+    setSync('busy');
+    const keys = Object.keys(dev.dirty), sent = {}, changes = [];
+    keys.forEach(k => {
+      const i = k.indexOf(':'), t = k.slice(0, i), r = getRec(t, k.slice(i + 1));
+      if (r) { sent[k] = r.updatedAt; changes.push({ t, r }); } else delete dev.dirty[k];
+    });
+    try {
+      const res = await api({ action: 'sync', since: dev.lastPull || 0, changes });
+      keys.forEach(k => { const i = k.indexOf(':'), r = getRec(k.slice(0, i), k.slice(i + 1)); if (!r || r.updatedAt === sent[k]) delete dev.dirty[k]; });
+      const n = merge(res.changes || []);
+      dev.lastPull = res.now; dev.lastSync = Date.now(); saveDev();
+      if (n) { save(); refresh(); }
+      setSync('ok'); lastErr = '';
+      if (Object.keys(dev.dirty).length) scheduleSync(800);
+      return true;
+    } catch (e) {
+      lastErr = e.message; setSync(navigator.onLine === false ? 'offline' : 'err'); return false;
+    } finally { syncP = null; }
+  })();
+  return syncP;
+}
+function softSync() { if (syncReady() && (Object.keys(dev.dirty).length || Date.now() - dev.lastSync > 20000)) sync(); }
+function merge(list) {
+  let n = 0;
+  list.forEach(({ t, r }) => {
+    if (!r || !(t in db)) return;
+    const dirty = dev.dirty[t + ':' + r.id];
+    if (t === 'settings') {
+      if (dirty && db.settings.updatedAt > r.updatedAt) return;
+      Object.keys(db.settings).forEach(k => delete db.settings[k]);
+      Object.assign(db.settings, DEF_SETTINGS, r); n++; return;
+    }
+    const arr = db[t], cur = arr.find(x => x.id === r.id);
+    if (!cur) { arr.push(r); n++; }
+    else if (!(dirty && cur.updatedAt > r.updatedAt)) { Object.keys(cur).forEach(k => delete cur[k]); Object.assign(cur, r); n++; }
+  });
+  return n;
+}
+function setSync(state) {
+  const b = $('#syncBtn'); b.className = 'sync ' + state;
+  b.title = { off: 'Locked', busy: 'Syncing…', ok: 'Synced', err: 'Sync error – tap to retry', offline: 'Offline – will sync later', idle: 'Cloud sync' }[state] || '';
+  if (current === 'settings' && state !== 'busy') paintSyncCard();
+}
+function refresh() {
+  if (!$('#modal').classList.contains('hidden')) { needRender = true; return; }
+  const a = document.activeElement;
+  if (a && V.contains(a) && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) { needRender = true; return; }
+  render();
+}
+$('#syncBtn').onclick = async () => {
+  if (!syncReady()) return showLock();
+  const ok = await sync(); toast(ok ? 'All data synced' : 'Sync failed – ' + lastErr);
+};
+
+/* ---------- UI helpers ---------- */
+const V = $('#view');
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+function openModal(html, bind) {
+  $('#sheet').innerHTML = html; $('#modal').classList.remove('hidden'); $('#sheet').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  $$('[data-close]', $('#sheet')).forEach(b => b.onclick = closeModal);
+  bind && bind($('#sheet'));
+}
+function closeModal() {
+  $('#modal').classList.add('hidden'); $('#sheet').innerHTML = ''; document.body.style.overflow = '';
+  if (needRender) { needRender = false; render(); }
+}
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+const sheetHead = t => `<div class="sheet-h"><h3>${t}</h3><button class="icon-btn" data-close aria-label="Close">✕</button></div>`;
+async function busy(btn, label, fn) {
+  const old = btn.innerHTML; btn.disabled = true; btn.textContent = label;
+  try { return await fn(); } finally { if (btn.isConnected) { btn.disabled = false; btn.innerHTML = old; } }
+}
+const ICON = {
+  dl: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+  share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
+  wa: '<svg viewBox="0 0 24 24"><path d="M20.5 11.8a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.3-4.3A8.5 8.5 0 1 1 20.5 11.8z"/><path d="M9 8.5c.2 2.6 3.3 5.8 6 6l1-1.4-2-1.1-1 .8c-1-.4-2-1.4-2.4-2.4l.8-1-1-2z"/></svg>'
+};
+// No pinch / double-tap zoom (feels like an app, not a web page)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+/* ---------- Business logic ---------- */
+function nextNo(date) {
+  const fy = fyOf(date);
+  const seq = db.invoices.filter(i => i.fy === fy).reduce((m, i) => Math.max(m, i.seq), 0) + 1;
+  return { fy, seq, no: `${db.settings.prefix || 'INV'}/${fy}/${seq}` };
+}
+function custBalance(cid) {
+  const c = db.customers.find(x => x.id === cid); let b = +(c?.opening || 0);
+  db.invoices.forEach(i => { if (i.customerId === cid && i.status !== 'cancelled') b += i.total - (+i.received || 0); });
+  db.payments.forEach(p => { if (p.customerId === cid && !p.deleted) b -= p.amount; });
+  return r2(b);
+}
+function taxFor(custState) {
+  const s = db.settings;
+  if (!s.gstin) return 'none';
+  return (custState || s.state) === s.state ? 'intra' : 'inter';
+}
+function calc(items, tax, rate) {
+  const sub = r2(items.reduce((a, i) => a + (+i.amount || 0), 0));
+  let cgst = 0, sgst = 0, igst = 0;
+  if (tax === 'intra') { cgst = r2(sub * rate / 200); sgst = cgst; }
+  else if (tax === 'inter') igst = r2(sub * rate / 100);
+  return { sub, cgst, sgst, igst, total: r2(sub + cgst + sgst + igst) };
+}
+function inWords(n) {
+  const A = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const B = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  const two = x => x < 20 ? A[x] : B[Math.floor(x / 10)] + (x % 10 ? ' ' + A[x % 10] : '');
+  const three = x => x >= 100 ? A[Math.floor(x / 100)] + ' Hundred' + (x % 100 ? ' ' + two(x % 100) : '') : two(x);
+  const w = x => {
+    if (!x) return 'Zero';
+    let s = ''; const cr = Math.floor(x / 1e7); x %= 1e7; const l = Math.floor(x / 1e5); x %= 1e5; const t = Math.floor(x / 1000); x %= 1000;
+    if (cr) s += w(cr) + ' Crore '; if (l) s += two(l) + ' Lakh '; if (t) s += two(t) + ' Thousand '; if (x) s += three(x);
+    return s.trim();
+  };
+  n = r2(Math.abs(n)); const r = Math.floor(n), p = Math.round((n - r) * 100);
+  return 'INR ' + w(r) + (p ? ' and ' + two(p) + ' Paise' : '') + ' Only';
+}
+function waNumber(p) {
+  const d = String(p || '').replace(/\D/g, '');
+  if (d.length === 10) return '91' + d;
+  if (d.length === 11 && d[0] === '0') return '91' + d.slice(1);
+  if (d.length === 12 && d.startsWith('91')) return d;
+  return '';
+}
+
+/* ---------- Fuzzy customer search ---------- */
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+const grams = s => { s = s.replace(/ /g, ''); const g = []; for (let i = 0; i < s.length - 1; i++) g.push(s.slice(i, i + 2)); return g; };
+function dice(a, b) {
+  const A = grams(a), Bg = grams(b); if (!A.length || !Bg.length) return 0;
+  const m = {}; Bg.forEach(x => m[x] = (m[x] || 0) + 1); let hit = 0;
+  A.forEach(x => { if (m[x]) { hit++; m[x]--; } });
+  return 2 * hit / (A.length + Bg.length);
+}
+// sound-alike skeleton: Alpha≈Alfa, Agarwal≈Aggarwal≈Agrawal, Shrivastava≈Srivastava, Choudhary≈Chaudhary
+const skel = w => w.replace(/ph/g, 'f').replace(/w/g, 'v').replace(/ck|q/g, 'k').replace(/z/g, 'j').replace(/([bcdgkpst])h/g, '$1').replace(/(.)\1+/g, '$1').replace(/\B[aeiouy]+/g, '');
+function custScore(q, c) {
+  const n = norm(c.name), words = n.split(' ');
+  if (n.startsWith(q)) return 100;
+  if (words.some(w => w.startsWith(q))) return 90;
+  if (n.includes(q)) return 80;
+  const qw = q.split(' ');
+  if (qw.length > 1 && qw.every(x => words.some(w => w.startsWith(x) || skel(w).startsWith(skel(x))))) return 78;
+  const qd = q.replace(/\D/g, '');
+  if (qd.length >= 3 && String(c.phone || '').replace(/\D/g, '').includes(qd)) return 75;
+  if (q.length < 3) return 0;
+  const sq = q.split(' ').map(skel).join(' '), sw = words.map(skel), sn = sw.join(' ');
+  if (sq.length >= 2 && (sn.startsWith(sq) || sw.some((w, i) => sw.slice(i).join(' ').startsWith(sq)))) return 72;
+  let best = 0;
+  words.forEach((_, i) => {
+    best = Math.max(best, dice(q, words.slice(i).join(' ').slice(0, q.length + 1)), dice(sq, sw.slice(i).join(' ').slice(0, sq.length + 1)));
+  });
+  return best >= 0.5 ? Math.round(best * 65) : 0;
+}
+function searchCustomers(q, limit = 6) {
+  q = norm(q);
+  const list = live('customers');
+  if (!q) {
+    const last = {}; db.invoices.forEach(i => { last[i.customerId] = Math.max(last[i.customerId] || 0, i.createdAt || 0); });
+    return list.sort((a, b) => (last[b.id] || b.createdAt || 0) - (last[a.id] || a.createdAt || 0)).slice(0, limit);
+  }
+  return list.map(c => [custScore(q, c), c]).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name)).slice(0, limit).map(x => x[1]);
+}
+function hilite(name, q) {
+  q = q.trim(); if (!q) return esc(name);
+  const i = name.toLowerCase().indexOf(q.toLowerCase());
+  return i < 0 ? esc(name) : esc(name.slice(0, i)) + '<mark>' + esc(name.slice(i, i + q.length)) + '</mark>' + esc(name.slice(i + q.length));
+}
+
+/* ---------- Navigation ---------- */
+const TITLES = { bill: 'New Bill', invoices: 'Invoices', customers: 'Customers', services: 'Services', settings: 'Settings' };
+let current = 'bill';
+const render = () => ({ bill: viewBill, invoices: viewInvoices, customers: viewCustomers, services: viewServices, settings: viewSettings })[current]();
+function go(v) {
+  current = v; $('#pageTitle').textContent = TITLES[v];
+  $$('.bottom button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
+  window.scrollTo(0, 0); render();
+}
+$$('.bottom button').forEach(b => b.onclick = () => go(b.dataset.go));
+$('#btnSettings').onclick = () => go('settings');
+
+/* ---------- Install prompt (home page) ---------- */
+let installEvt = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; paintInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; paintInstall(); toast('App installed'); });
+function paintInstall() {
+  const slot = $('#instSlot'); if (!slot) return;
+  if (standalone()) { slot.innerHTML = ''; return; }
+  if (installEvt) {
+    slot.innerHTML = `<div class="banner"><img src="images/icon-192.png" alt=""><div><b>Install Vaada Bills</b><small>Open it like an app · works offline</small></div><button class="btn primary sm" id="instBtn">Install</button></div>`;
+    $('#instBtn').onclick = async () => { installEvt.prompt(); try { await installEvt.userChoice; } catch (e) {} installEvt = null; paintInstall(); };
+  } else if (isIOS && !dev.iosHint) {
+    slot.innerHTML = `<div class="banner"><img src="images/icon-192.png" alt=""><div><b>Install on iPhone</b><small>Tap Share <b>⬆</b> then “Add to Home Screen”</small></div><button class="icon-btn" id="iosX" aria-label="Dismiss">✕</button></div>`;
+    $('#iosX').onclick = () => { dev.iosHint = true; saveDev(); paintInstall(); };
+  } else slot.innerHTML = '';
+}
+
+/* ================= BILL ================= */
+let draft = null;
+function newDraft(cust) {
+  const c = cust ? cleanCust(cust) : cleanCust({ state: db.settings.state });
+  draft = { date: todayISO(), customerId: cust?.id || null, cust: c, items: {}, payMode: 'cash', received: '' };
+}
+function selItems() {
+  return live('services').filter(s => draft.items[s.id]?.on).map(s => ({
+    serviceId: s.id, name: s.name, sac: s.sac || '', desc: (draft.items[s.id].desc || '').trim(), amount: r2(draft.items[s.id].amount)
+  }));
+}
+function receivedOf(total) {
+  if (draft.payMode === 'cash') return total;
+  if (draft.payMode === 'credit') return 0;
+  return Math.min(r2(draft.received), total);
+}
+function viewBill() {
+  if (!draft) newDraft();
+  if (draft.date > todayISO()) draft.date = todayISO();
+  const d = draft, c = d.cust, svcs = live('services');
+  V.innerHTML = `
+  <div id="instSlot"></div>
+  <section class="card">
+    <div class="row2">
+      <label>Invoice date<input type="date" id="bDate" value="${d.date}" max="${todayISO()}"></label>
+      <label>Invoice no. <span class="muted">(next)</span><input id="bNo" readonly value="${esc(nextNo(d.date).no)}"></label>
+    </div>
+  </section>
+  <section class="card">
+    <h3>Customer</h3>
+    <div id="custBadge"></div>
+    <div class="ta"><label>Name / Firm *<input id="c_name" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(c.name)}" placeholder="Type to search saved customers"></label><div class="ta-list" id="taList" hidden></div></div>
+    <label>Address<textarea id="c_address" rows="2">${esc(c.address)}</textarea></label>
+    <div class="row2">
+      <label>City<input id="c_city" value="${esc(c.city)}"></label>
+      <label>Pincode<input id="c_pincode" inputmode="numeric" maxlength="6" value="${esc(c.pincode)}"></label>
+    </div>
+    <label>State<select id="c_state">${stateOpts(c.state)}</select></label>
+    <div class="row2">
+      <label>Mobile<input id="c_phone" inputmode="tel" maxlength="13" value="${esc(c.phone)}"></label>
+      <label>PAN<input id="c_pan" maxlength="10" style="text-transform:uppercase" value="${esc(c.pan)}"></label>
+    </div>
+    <label style="margin:0">GSTIN <span class="muted">(optional)</span><input id="c_gstin" maxlength="15" style="text-transform:uppercase" value="${esc(c.gstin)}"></label>
+  </section>
+  <section class="card">
+    <h3>Services <button class="link" id="goSvc">Manage</button></h3>
+    <div id="svcPick">${svcs.length ? svcs.map(svcRow).join('') : `<div class="muted">No services yet. Add some in the Services tab.</div>`}</div>
+  </section>
+  <section class="card">
+    <h3>Payment</h3>
+    <div class="seg" id="paySeg"><button data-p="cash">All Cash</button><button data-p="credit">All Credit</button><button data-p="partial">Partial</button></div>
+    <label id="recvWrap" style="margin:10px 0 0" ${d.payMode === 'partial' ? '' : 'hidden'}>Amount received now (₹)<input id="recv" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(d.received)}"></label>
+  </section>
+  <section class="card sum" id="sum"></section>
+  <button class="btn primary block" id="btnSave">${ICON.dl} Save &amp; Get PDF</button>
+  <div class="center" style="margin-top:12px"><button class="link" id="btnClear">Clear form</button></div>`;
+
+  paintInstall();
+  $('#bDate').onchange = e => {
+    let v = e.target.value || todayISO();
+    if (v > todayISO()) { toast('Future dates are not allowed'); v = todayISO(); e.target.value = v; }
+    d.date = v; $('#bNo').value = nextNo(d.date).no;
+  };
+  CF.forEach(k => {
+    const el = $('#c_' + k); if (!el) return;
+    el.addEventListener('input', () => {
+      c[k] = (k === 'pan' || k === 'gstin') ? el.value.toUpperCase() : el.value;
+      if (k === 'name') { paintTA(); matchCust(); }
+      if (k === 'gstin') { const st = stateByCode(c.gstin.slice(0, 2)); if (c.gstin.length >= 2 && st && st !== c.state) { c.state = st; $('#c_state').value = st; recalc(); } }
+      if (k === 'state') recalc();
+    });
+  });
+  const nameEl = $('#c_name');
+  nameEl.addEventListener('focus', paintTA);
+  nameEl.addEventListener('blur', () => setTimeout(() => { const l = $('#taList'); if (l) l.hidden = true; }, 180));
+  nameEl.addEventListener('keydown', e => {
+    const l = $('#taList'); if (!l || l.hidden) return;
+    const items = $$('.ta-item', l); let i = items.findIndex(x => x.classList.contains('hl'));
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[i]?.classList.remove('hl'); i = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; items[i]?.classList.add('hl'); }
+    else if (e.key === 'Enter' && i >= 0) { e.preventDefault(); items[i].click(); }
+    else if (e.key === 'Escape') l.hidden = true;
+  });
+  $('#goSvc').onclick = () => go('services');
+  $$('.svc', V).forEach(row => {
+    const id = row.dataset.id, s = db.services.find(x => x.id === id);
+    const cb = $('input[type=checkbox]', row), amt = $('.amt', row), ds = $('.desc', row);
+    cb.onchange = () => {
+      const it = d.items[id] || (d.items[id] = { amount: s.rate, desc: s.desc || '' });
+      it.on = cb.checked; row.classList.toggle('on', cb.checked); amt.value = it.amount; ds.value = it.desc; recalc();
+    };
+    amt.oninput = () => { d.items[id].amount = amt.value; recalc(); };
+    ds.oninput = () => { d.items[id].desc = ds.value; };
+  });
+  $$('#paySeg button').forEach(b => b.onclick = () => { d.payMode = b.dataset.p; $('#recvWrap').hidden = d.payMode !== 'partial'; if (d.payMode === 'partial') $('#recv').focus(); paintPay(); });
+  $('#recv').oninput = e => { d.received = e.target.value; recalc(); };
+  $('#btnSave').onclick = saveBill;
+  $('#btnClear').onclick = () => { if (confirm('Clear this bill?')) { draft = null; viewBill(); } };
+  paintPay(); paintBadge();
+}
+function svcRow(s) {
+  const it = draft.items[s.id];
+  return `<div class="svc ${it?.on ? 'on' : ''}" data-id="${s.id}">
+    <label class="chk"><input type="checkbox" ${it?.on ? 'checked' : ''}>
+      <span><b>${esc(s.name)}</b>${s.desc ? `<small>${esc(s.desc)}</small>` : ''}</span>
+      <span class="rate">${rs(s.rate)}</span></label>
+    <div class="more"><input class="desc" placeholder="Details (e.g. for FY 2025-26)" value="${esc(it?.desc ?? s.desc ?? '')}">
+      <input class="amt" type="number" inputmode="decimal" min="0" step="0.01" value="${it?.amount ?? s.rate}"></div></div>`;
+}
+function paintPay() { $$('#paySeg button').forEach(b => b.classList.toggle('on', b.dataset.p === draft.payMode)); recalc(); }
+function recalc() {
+  const s = db.settings, rate = +s.gstRate || 18, tax = taxFor(draft.cust.state), t = calc(selItems(), tax, rate);
+  const prev = draft.customerId ? custBalance(draft.customerId) : 0, recv = receivedOf(t.total);
+  $('#sum').innerHTML = `
+    <div><span>Services total</span><span>${rs(t.sub)}</span></div>
+    ${t.cgst ? `<div><span>CGST @ ${rate / 2}%</span><span>${rs(t.cgst)}</span></div><div><span>SGST @ ${rate / 2}%</span><span>${rs(t.sgst)}</span></div>` : ''}
+    ${t.igst ? `<div><span>IGST @ ${rate}%</span><span>${rs(t.igst)}</span></div>` : ''}
+    ${tax !== 'none' ? `<div class="note">${tax === 'intra' ? `Customer in ${esc(s.state)} → CGST + SGST` : `Customer outside ${esc(s.state)} → IGST`}</div>` : ''}
+    <div class="total"><span>Bill amount</span><span>${rs(t.total)}</span></div>
+    ${s.showPrev !== false ? `<div><span>Previous balance</span><span>${drcr(prev)}</span></div>` : ''}
+    <div><span>Received now (${PAY[draft.payMode]})</span><span>${rs(recv)}</span></div>
+    <div class="net"><span>${s.showPrev !== false ? 'Net balance' : 'Balance due on this bill'}</span><span>${s.showPrev !== false ? drcr(prev + t.total - recv) : rs(t.total - recv)}</span></div>`;
+}
+function paintTA() {
+  const l = $('#taList'), q = $('#c_name').value; if (!l) return;
+  const res = searchCustomers(q);
+  if (!res.length || (res.length === 1 && norm(res[0].name) === norm(q) && res[0].id === draft.customerId)) { l.hidden = true; return; }
+  l.innerHTML = (q.trim() ? '' : '<div class="ta-head">Recent customers</div>') + res.map(c => {
+    const b = custBalance(c.id);
+    return `<div class="ta-item" data-id="${c.id}"><div class="avatar s">${esc(initials(c.name))}</div><div class="grow"><b>${hilite(c.name, q)}</b><small>${esc([c.phone, c.city].filter(Boolean).join(' · ') || '—')}</small></div>${b ? `<small class="${b > 0 ? 'dr' : 'cr'}">${drcr(b)}</small>` : ''}</div>`;
+  }).join('');
+  l.hidden = false;
+  $$('.ta-item', l).forEach(el => {
+    el.addEventListener('mousedown', e => e.preventDefault());
+    el.onclick = () => { l.hidden = true; fillCust(db.customers.find(x => x.id === el.dataset.id)); };
+  });
+}
+function matchCust() {
+  const n = norm(draft.cust.name);
+  const m = n && live('customers').find(x => norm(x.name) === n);
+  if (m && m.id !== draft.customerId) fillCust(m, true);
+  else if (!m && draft.customerId) { draft.customerId = null; paintBadge(); recalc(); }
+}
+function fillCust(m, keepName) {
+  if (!m) return;
+  draft.customerId = m.id; draft.cust = cleanCust(m);
+  if (!draft.cust.state) draft.cust.state = db.settings.state;
+  CF.forEach(k => { const el = $('#c_' + k); if (el && !(k === 'name' && keepName)) el.value = draft.cust[k]; });
+  paintBadge(); recalc();
+}
+function paintBadge() {
+  const b = $('#custBadge'); if (!b) return;
+  b.innerHTML = draft.customerId ? `<span class="badge">✓ Saved customer · Balance ${drcr(custBalance(draft.customerId))}</span>` : (draft.cust.name.trim() ? `<span class="badge">New customer – will be saved</span>` : '');
+}
+let saving = false;
+function blockPopup(title, msg) {
+  openModal(`<div style="text-align:center;padding:22px 6px 6px"><div style="font-size:42px;line-height:1">📶</div><h3 style="margin:12px 0 6px;font-size:18px">${title}</h3>
+    <p class="muted" style="margin:0 0 18px;font-size:14.5px">${msg}</p><button class="btn primary block" data-close>OK</button></div>`);
+}
+async function saveBill() {
+  if (saving) return;
+  const c = cleanCust(draft.cust);
+  if (!c.name) return toast('Enter customer name');
+  if (draft.date > todayISO()) return toast('Future dates are not allowed');
+  if (c.phone && !waNumber(c.phone)) return toast('Enter a valid 10-digit mobile number');
+  const items = selItems();
+  if (!items.length) return toast('Select at least one service');
+  if (items.some(i => !(i.amount > 0))) return toast('Enter amount for every selected service');
+  const rate = +db.settings.gstRate || 18, tax = taxFor(c.state), t = calc(items, tax, rate);
+  if (draft.payMode === 'partial') { const r = r2(draft.received); if (!(r > 0) || r >= t.total) return toast('Partial amount must be more than 0 and less than the bill amount'); }
+  if (!syncReady()) return showLock();
+  if (navigator.onLine === false) return blockPopup('No internet connection', 'Bills can be saved only when online, so that every invoice gets a unique number from the Google Sheet.<br><br>Your entries are kept – connect to internet and tap Save again.');
+  saving = true; const btn = $('#btnSave'); btn.disabled = true; btn.textContent = 'Saving to Google Sheet…';
+  try {
+    // 1) latest data first (balances + customers from other phones)
+    if (!(await sync())) return blockPopup('Could not reach Google Sheet', esc(lastErr) + '.<br><br>Bill is NOT saved. Your entries are kept – check internet and tap Save again.');
+    // 2) customer record
+    let cust = draft.customerId && db.customers.find(x => x.id === draft.customerId && !x.deleted);
+    if (cust) { if (CF.some(k => (cust[k] || '') !== c[k])) { Object.assign(cust, c); touch('customers', cust); } }
+    else { cust = { id: uid(), opening: 0, createdAt: Date.now(), ...c }; db.customers.push(cust); touch('customers', cust); }
+    draft.customerId = cust.id;
+    // 3) invoice – the Sheet assigns the number. Same draft id on retry = no duplicate invoice.
+    if (!draft.invId) draft.invId = uid();
+    const received = receivedOf(t.total), prev = custBalance(cust.id), s = db.settings;
+    const body = {
+      id: draft.invId, fy: fyOf(draft.date), prefix: s.prefix || 'INV', date: draft.date, createdAt: Date.now(), updatedAt: Date.now(),
+      customerId: cust.id, cust: c, items, tax, rate, ...t,
+      payMode: draft.payMode, received, prevBalance: prev, netBalance: r2(prev + t.total - received), status: 'active',
+      firm: Object.fromEntries(FIRM_KEYS.map(k => [k, s[k]]))
+    };
+    let res;
+    try { res = await api({ action: 'invoice', inv: body, changes: [{ t: 'customers', r: cust }] }, 30000); }
+    catch (e) { return blockPopup('Bill not saved', esc(e.message) + '.<br><br>Your entries are kept – check internet and tap Save again. (Retrying will never create a duplicate bill.)'); }
+    const k = 'customers:' + cust.id; if (dev.dirty[k] && db.customers.find(x => x.id === cust.id)?.updatedAt === cust.updatedAt) delete dev.dirty[k];
+    const inv = res.inv, old = db.invoices.find(x => x.id === inv.id);
+    old ? Object.assign(old, inv) : db.invoices.push(inv);
+    save(); saveDev();
+    draft = null; viewBill(); window.scrollTo(0, 0);
+    toast(`Invoice ${inv.no} saved`);
+    openInvoice(inv.id);
+  } finally { saving = false; const b = $('#btnSave'); if (b && b.disabled) { b.disabled = false; b.innerHTML = ICON.dl + ' Save &amp; Get PDF'; } }
+}
+
+/* ================= INVOICE HELPERS ================= */
+function balRows(inv, f) {
+  const recv = +inv.received || 0;
+  return f.showPrev !== false
+    ? [['Prev Balance', drcr(inv.prevBalance)], ['Bill Amount', drcr(inv.total), 1], ...(recv ? [['Received', money(recv) + ' Cr', 1]] : []), ['Net Balance', drcr(inv.netBalance), 1]]
+    : [['Bill Amount', money(inv.total)], ['Received', money(recv), 1], ['Balance Due', money(inv.total - recv), 1]];
+}
+function taxRows(inv) {
+  const r = [];
+  if (inv.cgst) r.push([`CGST @ ${inv.rate / 2}%`, inv.cgst], [`SGST @ ${inv.rate / 2}%`, inv.sgst]);
+  if (inv.igst) r.push([`IGST @ ${inv.rate}%`, inv.igst]);
+  return r;
+}
+const termsOf = f => String(f.terms || '').split('\n').map(x => x.trim()).filter(Boolean);
+function custLines(c, gst) {
+  return [c.address, [c.city, c.pincode && 'Pincode : ' + c.pincode].filter(Boolean).join('  '),
+    c.state && (gst ? `State : ${c.state} (${codeOf(c.state)})` : 'State : ' + c.state),
+    c.phone && 'Mobile : ' + c.phone, c.pan && 'PAN No. : ' + c.pan, c.gstin && 'GSTIN : ' + c.gstin].filter(Boolean);
+}
+/* ================= PDF (vector, via pdf-lib) ================= */
+let libP, logoP, upiP;
+function loadUpi() { // images/upi.jpg is optional – shown only when present
+  return upiP || (upiP = fetch('images/upi.jpg', { cache: 'no-cache' }).then(r => r.ok && /image/.test(r.headers.get('content-type') || 'image') ? r.arrayBuffer() : null).catch(() => { upiP = null; return null; }));
+}
+function loadPdfLib() {
+  return libP || (libP = new Promise((res, rej) => {
+    if (window.PDFLib) return res();
+    const s = document.createElement('script'); s.src = 'pdf-lib.min.js';
+    s.onload = res; s.onerror = () => { libP = null; rej(new Error('PDF library failed to load')); };
+    document.head.appendChild(s);
+  }));
+}
+const WIN = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
+const pdfSafe = s => String(s ?? '').replace(/₹/g, 'Rs.').replace(/[\t\r\n]+/g, ' ').replace(/[^\x20-\x7E\xA0-\xFF]/g, c => WIN.includes(c) ? c : '');
+const pdfCache = {};
+const fileName = inv => `Invoice ${inv.no.replace(/\//g, '-')} ${inv.cust.name}`.replace(/[^\w\- .&()]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80) + '.pdf';
+function makePdf(inv) {
+  const k = inv.id + ':' + inv.status;
+  if (!pdfCache[k]) pdfCache[k] = buildPdf(inv).catch(e => { delete pdfCache[k]; throw e; });
+  return pdfCache[k];
+}
+async function buildPdf(inv) {
+  await loadPdfLib();
+  const { PDFDocument, StandardFonts, rgb, degrees } = window.PDFLib;
+  const f = { ...DEF_SETTINGS, ...(inv.firm || db.settings) }, c = inv.cust, gst = inv.tax !== 'none';
+  const doc = await PDFDocument.create();
+  doc.setTitle('Invoice ' + inv.no); doc.setAuthor(pdfSafe(f.firm)); doc.setCreator('Vaada Billing by Weave Solutions'); doc.setProducer('Weave Solutions');
+  const W = 595.28, H = 841.89, page = doc.addPage([W, H]);
+  const F = await doc.embedFont(StandardFonts.Helvetica), B = await doc.embedFont(StandardFonts.HelveticaBold), T = await doc.embedFont(StandardFonts.TimesRomanBold);
+  const ink = rgb(.07, .07, .07), grey = rgb(.32, .32, .32), taupe = rgb(.44, .38, .33);
+  const L = 28, R = W - 28, BW = R - L, MID = L + BW / 2, C1 = L + 36, C3 = R - 110;
+  const txt = (s, x, y, o = {}) => {
+    s = pdfSafe(s); const font = o.font || F, size = o.size || 9.5, w = font.widthOfTextAtSize(s, size);
+    page.drawText(s, { x: o.align === 'right' ? x - w : o.align === 'center' ? x - w / 2 : x, y, size, font, color: o.color || ink }); return w;
+  };
+  const ln = (x1, y1, x2, y2, t = .9) => page.drawLine({ start: { x: x1, y: y1 }, end: { x: x2, y: y2 }, thickness: t, color: ink });
+  const wrap = (s, font, size, maxW) => {
+    const out = [];
+    String(s ?? '').split('\n').forEach(par => {
+      const words = pdfSafe(par).split(/\s+/).filter(Boolean); let cur = '';
+      words.forEach(w => {
+        const t2 = cur ? cur + ' ' + w : w;
+        if (font.widthOfTextAtSize(t2, size) <= maxW) { cur = t2; return; }
+        if (cur) out.push(cur);
+        while (font.widthOfTextAtSize(w, size) > maxW) { let k = w.length; while (k > 1 && font.widthOfTextAtSize(w.slice(0, k), size) > maxW) k--; out.push(w.slice(0, k)); w = w.slice(k); }
+        cur = w;
+      });
+      if (cur) out.push(cur);
+    });
+    return out;
+  };
+  const spaced = (s, cx, y, size, sp, color) => {
+    s = pdfSafe(s); const ws = [...s].map(ch => F.widthOfTextAtSize(ch, size)); const tot = ws.reduce((a, b) => a + b, 0) + sp * (s.length - 1);
+    let x = cx - tot / 2; [...s].forEach((ch, i) => { page.drawText(ch, { x, y, size, font: F, color }); x += ws[i] + sp; });
+  };
+
+  const top = H - 30; let y = top;
+  // Header
+  if (!logoP) logoP = fetch('images/logo.png').then(r => r.arrayBuffer());
+  let lw = 0;
+  try { const img = await doc.embedPng(await logoP), lh = 58; lw = img.width * lh / img.height; page.drawImage(img, { x: L + 12, y: y - 12 - lh, width: lw, height: lh }); } catch (e) { logoP = null; }
+  const cx = (L + 12 + lw + R) / 2 - 8, aw = R - (L + 24 + lw) - 20;
+  const addr = wrap(f.address, F, 9, aw), contact = [f.email && 'E-Mail : ' + f.email, f.phone && 'Ph : ' + f.phone].filter(Boolean).join('  |  ');
+  const hh = Math.max(84, 56 + (addr.length + (contact ? 1 : 0)) * 11.5 + 6);
+  txt(f.firm, cx, y - 30, { font: T, size: 22, align: 'center' });
+  spaced((f.tagline || '').toUpperCase(), cx, y - 44, 7.5, 2.2, taupe);
+  let hy = y - 58; addr.forEach(a => { txt(a, cx, hy, { size: 9, align: 'center' }); hy -= 11.5; });
+  if (contact) txt(contact, cx, hy, { size: 9, align: 'center' });
+  y -= hh; ln(L, y, R, y);
+  // Title
+  txt(f.gstin ? 'TAX INVOICE' : 'INVOICE', W / 2, y - 14, { font: B, size: 11, align: 'center' });
+  y -= 20; ln(L, y, R, y);
+  // To / meta
+  const left = [['To,', F, 9.5], ...wrap(c.name, B, 10, BW / 2 - 16).map(t => [t, B, 10]), ...custLines(c, gst).flatMap(l => wrap(l, F, 9.5, BW / 2 - 16)).map(t => [t, F, 9.5])];
+  const meta = [['Invoice No.', inv.no], ['Invoice Date', fmtDate(inv.date)], ['Payment', PAY[inv.payMode] || 'Credit']].concat(gst ? [['Place of Supply', `${c.state} (${codeOf(c.state)})`]] : []);
+  const bh = Math.max(left.length, meta.length) * 12.5 + 12;
+  left.forEach(([t, font, size], i) => txt(t, L + 8, y - 14 - i * 12.5, { font, size }));
+  meta.forEach(([a, b], i) => { txt(a, MID + 8, y - 14 - i * 12.5); txt(': ' + b, MID + 88, y - 14 - i * 12.5, { font: B }); });
+  ln(MID, y, MID, y - bh); y -= bh; ln(L, y, R, y);
+  // Fees line + item header
+  txt('Fees for Professional Services rendered as under :-', L + 8, y - 14, { font: B });
+  y -= 20; ln(L, y, R, y);
+  const itemsTop = y;
+  txt('No.', (L + C1) / 2, y - 14, { font: B, align: 'center' });
+  txt('Particulars', (C1 + C3) / 2, y - 14, { font: B, align: 'center' });
+  txt('Amount (Rs.)', R - 8, y - 14, { font: B, align: 'right' });
+  y -= 20; ln(L, y, R, y);
+
+  // Bottom blocks (measured first, drawn bottom-up)
+  const boxBottom = 42, half = BW / 2 - 16;
+  const terms = termsOf(f).flatMap((t, i) => wrap(`(${i + 1}) ${t}`, F, 8.5, half));
+  const signH = Math.max(80, terms.length * 11 + 30);
+  const idsL = [f.pan && ['PAN No. : ', f.pan], f.gstin && ['GSTIN : ', f.gstin]].filter(Boolean);
+  const idsR = (f.bank || f.acno) ? [['Bank Details :', F], [f.bank, B], ['A/c No. ' + f.acno, B]].concat(f.ifsc ? [['IFSC Code : ' + f.ifsc, B]] : []) : [];
+  let qr = null; const qb = await loadUpi();
+  if (qb) { try { qr = await doc.embedJpg(qb); } catch (e) { try { qr = await doc.embedPng(qb); } catch (e2) { qr = null; } } }
+  const qrS = 74;
+  const idsH = (idsL.length || idsR.length || qr) ? Math.max(idsL.length * 12 + 12, idsR.length * 12 + 12, qr ? qrS + 22 : 0) : 0;
+  const words = wrap(inWords(inv.total), B, 9.5, half), bals = balRows(inv, f);
+  const wbH = Math.max(words.length + 1, bals.length) * 13 + 12;
+  const totBottom = boxBottom + signH + idsH + wbH, totTop = totBottom + 20;
+
+  // Items (shrink font if a very long bill)
+  const all = inv.items.map(i => ({ name: i.name, subs: [i.desc, i.sac && gst ? 'SAC : ' + i.sac : ''].filter(Boolean), amt: i.amount }))
+    .concat(taxRows(inv).map(([l, v]) => ({ name: l, subs: [], amt: v })));
+  const pw = C3 - C1 - 16;
+  let sz = 10, laid;
+  for (; sz >= 6.5; sz -= .5) {
+    const lh = sz * 1.3; let h = 6;
+    laid = all.map(it => { const nl = wrap(it.name, B, sz, pw), sl = it.subs.flatMap(s => wrap(s, F, sz - 1, pw - 18)); const rh = (nl.length + sl.length) * lh + 5; h += rh; return { ...it, nl, sl, rh, lh }; });
+    if (h <= y - totTop) break;
+  }
+  let iy = y - 6;
+  laid.forEach((it, i) => {
+    let ly = iy - it.lh + 3;
+    txt(String(i + 1), (L + C1) / 2, ly, { size: sz, align: 'center' });
+    txt(money(it.amt), R - 8, ly, { size: sz, align: 'right' });
+    it.nl.forEach(t => { txt(t, C1 + 8, ly, { font: B, size: sz }); ly -= it.lh; });
+    it.sl.forEach(t => { txt(t, C1 + 26, ly, { size: sz - 1, color: grey }); ly -= it.lh; });
+    iy -= it.rh;
+  });
+  ln(C1, itemsTop, C1, totBottom); ln(C3, itemsTop, C3, totBottom);
+  // Total row
+  ln(L, totTop, R, totTop, 1.3); ln(L, totBottom, R, totBottom);
+  txt('Total', C3 - 8, totTop - 14, { font: B, align: 'right' });
+  txt('Rs. ' + money(inv.total), R - 8, totTop - 14, { font: B, align: 'right' });
+  // Words + balances
+  y = totBottom;
+  txt('Amount in Words (INR)', L + 8, y - 14);
+  words.forEach((t, i) => txt(t, L + 8, y - 27 - i * 13, { font: B }));
+  bals.forEach(([l, v, u], i) => {
+    const by = y - 14 - i * 13; txt(l, R - 170, by, { color: grey });
+    const w = txt(v, R - 8, by, { font: B, align: 'right' });
+    if (u) ln(R - 8 - w - 2, by - 2.5, R - 8, by - 2.5, .6);
+  });
+  ln(MID, y, MID, y - wbH); y -= wbH; ln(L, y, R, y);
+  // IDs + bank
+  if (idsH) {
+    idsL.forEach(([a, b], i) => { txt(a, L + 8, y - 14 - i * 12); txt(b, L + 62, y - 14 - i * 12, { font: B }); });
+    idsR.forEach(([t, font], i) => txt(t, MID + 8, y - 14 - i * 12, { font }));
+    if (qr) {
+      const sc = Math.min(qrS / qr.width, qrS / qr.height), qw = qr.width * sc, qh = qr.height * sc, qx = R - 8 - qrS + (qrS - qw) / 2;
+      page.drawImage(qr, { x: qx, y: y - 6 - qh, width: qw, height: qh });
+      txt('Scan & Pay (UPI)', R - 8 - qrS / 2, y - qrS - 16, { size: 7.5, align: 'center', color: grey });
+    }
+    ln(MID, y, MID, y - idsH); y -= idsH; ln(L, y, R, y);
+  }
+  // Terms + signatory
+  terms.forEach((t, i) => txt(t, L + 8, y - 14 - i * 11, { size: 8.5 }));
+  txt('For ' + f.firm, R - 8, y - 14, { font: B, align: 'right' });
+  txt('Authorised Signatory', R - 8, boxBottom + 8, { align: 'right' });
+  ln(MID, y, MID, boxBottom);
+  page.drawRectangle({ x: L, y: boxBottom, width: BW, height: top - boxBottom, borderColor: ink, borderWidth: 1.1 });
+  txt('This is a computer generated invoice.', W / 2, 28, { size: 7.5, color: grey, align: 'center' });
+  if (inv.status === 'cancelled') {
+    const s = 'CANCELLED', size = 78, w = B.widthOfTextAtSize(s, size), a = 30 * Math.PI / 180;
+    page.drawText(s, { x: W / 2 - (w / 2) * Math.cos(a), y: H / 2 - (w / 2) * Math.sin(a), size, font: B, color: rgb(.75, .15, .15), opacity: .18, rotate: degrees(30) });
+  }
+  const bytes = await doc.save();
+  return new File([bytes], fileName(inv), { type: 'application/pdf' });
+}
+async function downloadPdf(inv) {
+  const f = await makePdf(inv), url = URL.createObjectURL(f), a = document.createElement('a');
+  a.href = url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function shareNote(inv) {
+  const s = db.settings, t = s.waMsg || '';
+  const map = { name: inv.cust.name, firm: (inv.firm || s).firm, no: inv.no, date: fmtDate(inv.date), amount: rs(inv.total), balance: drcr(custBalance(inv.customerId)) };
+  return t.replace(/\{(\w+)\}/g, (m, k) => k in map ? map[k] : m).trim();
+}
+async function sharePdf(inv) {
+  const f = await makePdf(inv), text = shareNote(inv);
+  if (navigator.canShare && navigator.canShare({ files: [f] })) {
+    try { await navigator.share(text ? { files: [f], text } : { files: [f] }); }
+    catch (e) {
+      if (e.name === 'AbortError') return;
+      if (e.name === 'NotAllowedError') return toast('PDF is ready – tap Share again');
+      try { await navigator.share({ files: [f] }); } catch (e2) { if (e2.name !== 'AbortError') { await downloadPdf(inv); toast('Could not open share – PDF downloaded instead'); } }
+    }
+  } else { await downloadPdf(inv); try { await navigator.clipboard.writeText(text); } catch (e) {} toast('Sharing not supported here – PDF downloaded'); }
+}
+
+/* ================= INVOICES ================= */
+function viewInvoices() {
+  const fy = fyOf(todayISO()), thisFY = db.invoices.filter(i => i.fy === fy && i.status !== 'cancelled');
+  V.innerHTML = `
+    <div class="stats"><div class="stat"><small>Invoices FY ${fy}</small><b>${thisFY.length}</b></div>
+      <div class="stat"><small>Billed FY ${fy}</small><b>${rs(thisFY.reduce((a, i) => a + i.total, 0))}</b></div></div>
+    <input class="search" id="iq" placeholder="Search invoice no. or customer">
+    <div id="il"></div>`;
+  const paint = q => {
+    q = q.toLowerCase();
+    const list = [...db.invoices].sort((a, b) => b.date.localeCompare(a.date) || b.seq - a.seq)
+      .filter(i => !q || i.no.toLowerCase().includes(q) || i.cust.name.toLowerCase().includes(q));
+    $('#il').innerHTML = list.length ? list.map(i => {
+      const cx = i.status === 'cancelled';
+      return `<div class="item ${cx ? 'cx' : ''}" data-id="${i.id}"><div class="grow"><div class="t">${esc(i.cust.name)}</div>
+      <div class="s">${esc(i.no)} · ${fmtDate(i.date)} ${cx ? '<span class="tag red">Cancelled</span>' : i.payMode !== 'cash' ? `<span class="tag">${PAY[i.payMode] || 'Credit'}</span>` : ''}</div></div>
+      <div class="amt">${rs(i.total)}<small>${i.items.length} service${i.items.length > 1 ? 's' : ''}</small></div></div>`;
+    }).join('') : `<div class="empty">${db.invoices.length ? 'No matching invoices' : 'No invoices yet.<br>Make your first bill from the Bill tab.'}</div>`;
+    $$('#il .item').forEach(el => el.onclick = () => openInvoice(el.dataset.id));
+  };
+  $('#iq').oninput = e => paint(e.target.value); paint('');
+}
+function openInvoice(id) {
+  const inv = db.invoices.find(i => i.id === id); if (!inv) return;
+  const cx = inv.status === 'cancelled', c = inv.cust, f = { ...DEF_SETTINGS, ...(inv.firm || {}) };
+  const line = (a, b, cls = '') => `<div class="tx ${cls}"><span>${a}</span><span>${b}</span></div>`;
+  const recv = +inv.received || 0;
+  openModal(sheetHead(`${esc(inv.no)} ${cx ? '<span class="tag red">Cancelled</span>' : ''}`) + `
+    <section class="card ${cx ? 'cxcard' : ''}">
+      <div class="dt-name">${esc(c.name)}</div>
+      <div class="muted">${esc([c.phone, c.city, c.state].filter(Boolean).join(' · ') || '—')}${c.gstin ? '<br>GSTIN ' + esc(c.gstin) : ''}</div>
+      <div class="dt-meta"><span>📅 ${fmtDate(inv.date)}</span><span>💳 ${PAY[inv.payMode] || 'Credit'}</span>${inv.tax !== 'none' ? `<span>${inv.tax === 'intra' ? 'CGST+SGST' : 'IGST'}</span>` : ''}</div>
+    </section>
+    <section class="card"><h3>Services</h3>
+      ${inv.items.map(i => `<div class="tx"><span><b>${esc(i.name)}</b>${i.desc ? `<br><small class="muted">${esc(i.desc)}</small>` : ''}</span><span>${money(i.amount)}</span></div>`).join('')}
+      ${taxRows(inv).map(([l, v]) => line(l, money(v))).join('')}
+      <div class="tx dt-total"><span>Total</span><span>${rs(inv.total)}</span></div>
+    </section>
+    <section class="card">
+      ${f.showPrev !== false ? line('Previous balance', drcr(inv.prevBalance)) : ''}
+      ${line('Bill amount', rs(inv.total))}
+      ${line('Received', rs(recv))}
+      ${f.showPrev !== false ? line('<b>Net balance</b>', '<b>' + drcr(inv.netBalance) + '</b>') : line('<b>Balance due</b>', '<b>' + rs(inv.total - recv) + '</b>')}
+    </section>
+    <div class="actions"><button class="btn primary" data-a="share">${ICON.share} Share PDF</button><button class="btn" data-a="dl">${ICON.dl} Download</button></div>
+    <div class="center" style="margin-top:16px">${cx ? '<button class="btn" data-a="revive">↺ Revive invoice</button>' : '<button class="link danger" data-a="cancel">Cancel this invoice</button>'}</div>`, sh => {
+    makePdf(inv).catch(() => {}); // prepare in background so Share opens instantly
+    $('[data-a=dl]', sh).onclick = e => busy(e.currentTarget, 'Preparing…', () => downloadPdf(inv)).catch(err => toast(err.message));
+    $('[data-a=share]', sh).onclick = e => busy(e.currentTarget, 'Preparing…', () => sharePdf(inv)).catch(err => toast(err.message));
+    $('[data-a=cancel]', sh) && ($('[data-a=cancel]', sh).onclick = () => {
+      if (!confirm(`Cancel invoice ${inv.no}?\nIt will stay in the list (struck off) and can be revived later.`)) return;
+      inv.status = 'cancelled'; inv.cancelledAt = Date.now(); touch('invoices', inv); toast('Invoice cancelled'); openInvoice(id); needRender = true;
+    });
+    $('[data-a=revive]', sh) && ($('[data-a=revive]', sh).onclick = () => {
+      inv.status = 'active'; delete inv.cancelledAt; touch('invoices', inv); toast('Invoice revived'); openInvoice(id); needRender = true;
+    });
+  });
+}
+
+/* ================= CUSTOMERS ================= */
+function viewCustomers() {
+  V.innerHTML = `<input class="search" id="cq" placeholder="Search name, mobile or city"><div id="cl"></div>
+    <button class="fab" id="addCust">+ Customer</button>`;
+  const paint = q => {
+    const list = q.trim() ? searchCustomers(q, 500) : live('customers').sort((a, b) => a.name.localeCompare(b.name));
+    $('#cl').innerHTML = list.length ? list.map(c => {
+      const b = custBalance(c.id); return `<div class="item" data-id="${c.id}"><div class="avatar">${esc(initials(c.name))}</div>
+      <div class="grow"><div class="t">${esc(c.name)}</div><div class="s">${esc([c.phone, c.city].filter(Boolean).join(' · ') || '—')}</div></div>
+      <div class="amt ${b > 0 ? 'dr' : b < 0 ? 'cr' : ''}">${money(Math.abs(b))}<small>${b > 0 ? 'Due' : b < 0 ? 'Advance' : 'Settled'}</small></div></div>`;
+    }).join('') : `<div class="empty">${live('customers').length ? 'No matching customers' : 'No customers yet.<br>They are saved automatically when you make a bill.'}</div>`;
+    $$('#cl .item').forEach(el => el.onclick = () => openCustomer(el.dataset.id));
+  };
+  $('#cq').oninput = e => paint(e.target.value); paint('');
+  $('#addCust').onclick = () => openCustomer(null);
+}
+function custForm(c) {
+  const f = (k, l, extra = '') => `<label>${l}<input id="f_${k}" value="${esc(c[k] ?? '')}" ${extra}></label>`;
+  return `<section class="card">
+    ${f('name', 'Name / Firm *')}
+    <label>Address<textarea id="f_address" rows="2">${esc(c.address || '')}</textarea></label>
+    <div class="row2">${f('city', 'City')}${f('pincode', 'Pincode', 'inputmode="numeric" maxlength="6"')}</div>
+    <label>State<select id="f_state">${stateOpts(c.state || db.settings.state)}</select></label>
+    <div class="row2">${f('phone', 'Mobile', 'inputmode="tel" maxlength="13"')}${f('email', 'Email', 'type="email"')}</div>
+    <div class="row2">${f('pan', 'PAN', 'maxlength="10" style="text-transform:uppercase"')}${f('gstin', 'GSTIN', 'maxlength="15" style="text-transform:uppercase"')}</div>
+    <label style="margin:0">Opening balance (₹ due before using app)<input id="f_opening" type="number" inputmode="decimal" step="0.01" value="${+c.opening || 0}"></label>
+  </section>`;
+}
+function readCustForm(sh) {
+  const o = {}; CF.forEach(k => o[k] = $('#f_' + k, sh).value.trim()); o.pan = o.pan.toUpperCase(); o.gstin = o.gstin.toUpperCase();
+  const st = stateByCode(o.gstin.slice(0, 2)); if (o.gstin.length >= 2 && st) o.state = st;
+  o.opening = r2($('#f_opening', sh).value); return o;
+}
+function validCust(o, selfId) {
+  if (!o.name) { toast('Enter name'); return false; }
+  if (o.phone && !waNumber(o.phone)) { toast('Enter a valid 10-digit mobile number'); return false; }
+  const dup = live('customers').find(x => x.id !== selfId && norm(x.name) === norm(o.name));
+  if (dup && !confirm(`A customer named "${dup.name}" already exists. Save anyway?`)) return false;
+  return true;
+}
+function openCustomer(id) {
+  if (!id) {
+    return openModal(sheetHead('New customer') + custForm({}) + `<button class="btn primary block" id="sv">Save customer</button>`, sh => {
+      $('#sv', sh).onclick = () => { const o = readCustForm(sh); if (!validCust(o)) return; const c = { id: uid(), createdAt: Date.now(), ...o }; db.customers.push(c); touch('customers', c); closeModal(); viewCustomers(); toast('Customer saved'); };
+    });
+  }
+  const c = db.customers.find(x => x.id === id); if (!c) return;
+  const invs = db.invoices.filter(i => i.customerId === id), pays = live('payments').filter(p => p.customerId === id);
+  const tx = [];
+  invs.forEach(i => {
+    const cx = i.status === 'cancelled';
+    tx.push({ d: i.date, t: i.createdAt, html: `<div class="tx ${cx ? 'cx' : ''}" data-inv="${i.id}" style="cursor:pointer"><span>${fmtDate(i.date)} · <b>${esc(i.no)}</b>${cx ? ' <span class="tag red">Cancelled</span>' : ''}</span><span class="dr">+ ${money(i.total)}</span></div>` });
+    if (+i.received) tx.push({ d: i.date, t: i.createdAt - 1, html: `<div class="tx ${cx ? 'cx' : ''}"><span>${fmtDate(i.date)} · Received with bill (${PAY[i.payMode]})</span><span class="cr">− ${money(i.received)}</span></div>` });
+  });
+  pays.forEach(p => tx.push({ d: p.date, t: p.createdAt, html: `<div class="tx"><span>${fmtDate(p.date)} · Received${p.note ? ' – ' + esc(p.note) : ''} <button class="link danger" data-delpay="${p.id}" aria-label="Delete payment">✕</button></span><span class="cr">− ${money(p.amount)}</span></div>` }));
+  tx.sort((a, b) => b.d.localeCompare(a.d) || b.t - a.t);
+  const bal = custBalance(id), billed = invs.filter(i => i.status !== 'cancelled').reduce((a, i) => a + i.total, 0);
+  openModal(sheetHead(esc(c.name)) + `
+    <div class="stats"><div class="stat"><small>Balance</small><b class="${bal > 0 ? 'dr' : bal < 0 ? 'cr' : ''}">${drcr(bal)}</b></div>
+      <div class="stat"><small>Total billed</small><b>${rs(billed)}</b></div></div>
+    <div class="actions" style="margin-bottom:12px"><button class="btn primary" id="nb">New bill</button><button class="btn" id="rp">Receive payment</button></div>
+    <section class="card"><h3>Ledger</h3>${tx.length ? tx.map(x => x.html).join('') : '<div class="muted">No transactions yet</div>'}
+      ${+c.opening ? `<div class="tx"><span>Opening balance</span><span>${drcr(+c.opening)}</span></div>` : ''}</section>
+    <h3 style="font-size:13px;color:var(--taupe);text-transform:uppercase;letter-spacing:.7px;margin:16px 2px 8px">Details</h3>
+    ${custForm(c)}
+    <div class="actions"><button class="btn primary" id="sv">Save changes</button><button class="btn danger" id="del">Delete</button></div>`, sh => {
+    $('#nb', sh).onclick = () => { closeModal(); newDraft(c); go('bill'); };
+    $('#rp', sh).onclick = () => receivePayment(c);
+    $$('[data-inv]', sh).forEach(el => el.onclick = () => openInvoice(el.dataset.inv));
+    $$('[data-delpay]', sh).forEach(b => b.onclick = e => {
+      e.stopPropagation(); if (!confirm('Delete this payment entry?')) return;
+      const p = db.payments.find(x => x.id === b.dataset.delpay); p.deleted = true; touch('payments', p); needRender = true; openCustomer(id);
+    });
+    $('#sv', sh).onclick = () => { const o = readCustForm(sh); if (!validCust(o, id)) return; Object.assign(c, o); touch('customers', c); closeModal(); viewCustomers(); toast('Saved'); };
+    $('#del', sh).onclick = () => {
+      if (invs.length || pays.length) return toast('This customer has invoices/payments – cannot delete');
+      if (!confirm('Delete ' + c.name + '?')) return;
+      c.deleted = true; touch('customers', c); closeModal(); viewCustomers(); toast('Customer deleted');
+    };
+  });
+}
+function receivePayment(c) {
+  openModal(sheetHead('Receive payment – ' + esc(c.name)) + `<section class="card">
+    <div class="row2"><label>Date<input type="date" id="pd" value="${todayISO()}" max="${todayISO()}"></label><label>Amount (₹)<input type="number" inputmode="decimal" id="pa" step="0.01"></label></div>
+    <label style="margin:0">Note<input id="pn" placeholder="e.g. UPI / Cheque no."></label></section>
+    <button class="btn primary block" id="ps">Save payment</button>`, sh => {
+    $('#pa', sh).focus();
+    $('#ps', sh).onclick = () => {
+      const amt = r2($('#pa', sh).value), date = $('#pd', sh).value || todayISO();
+      if (!(amt > 0)) return toast('Enter amount');
+      if (date > todayISO()) return toast('Future dates are not allowed');
+      const p = { id: uid(), customerId: c.id, custName: c.name, date, amount: amt, note: $('#pn', sh).value.trim(), createdAt: Date.now() };
+      db.payments.push(p); touch('payments', p); toast('Payment recorded'); needRender = true; openCustomer(c.id);
+    };
+  });
+}
+
+/* ================= SERVICES ================= */
+function viewServices() {
+  const list = live('services');
+  V.innerHTML = `${list.length ? list.map(s => `<div class="item" data-id="${s.id}"><div class="grow"><div class="t">${esc(s.name)}</div>
+    <div class="s">${esc([s.desc, s.sac && 'SAC ' + s.sac].filter(Boolean).join(' · ') || '—')}</div></div><div class="amt">${rs(s.rate)}<small>tap to edit</small></div></div>`).join('')
+    : `<div class="empty">No services yet.</div>`}
+    <button class="fab" id="addSvc">+ Service</button>`;
+  $$('.item', V).forEach(el => el.onclick = () => editService(el.dataset.id));
+  $('#addSvc').onclick = () => editService(null);
+}
+function editService(id) {
+  const s = id ? db.services.find(x => x.id === id) : { name: '', desc: '', sac: '', rate: '' };
+  openModal(sheetHead(id ? 'Edit service' : 'New service') + `<section class="card">
+    <label>Service name *<input id="sn" value="${esc(s.name)}"></label>
+    <label>Default details <span class="muted">(printed under name)</span><input id="sd" value="${esc(s.desc)}"></label>
+    <div class="row2"><label style="margin:0">Default fee (₹)<input id="sr" type="number" inputmode="decimal" step="0.01" value="${s.rate}"></label>
+    <label style="margin:0">SAC code<input id="ss" inputmode="numeric" value="${esc(s.sac)}"></label></div></section>
+    <div class="actions"><button class="btn primary" id="sv">Save</button>${id ? '<button class="btn danger" id="del">Delete</button>' : ''}</div>`, sh => {
+    $('#sn', sh).focus();
+    $('#sv', sh).onclick = () => {
+      const o = { name: $('#sn', sh).value.trim(), desc: $('#sd', sh).value.trim(), rate: r2($('#sr', sh).value), sac: $('#ss', sh).value.trim() };
+      if (!o.name) return toast('Enter service name');
+      let rec = s; if (id) Object.assign(s, o); else { rec = { id: uid(), ...o }; db.services.push(rec); }
+      touch('services', rec); closeModal(); viewServices(); toast('Service saved');
+    };
+    if (id) $('#del', sh).onclick = () => {
+      if (!confirm(`Delete "${s.name}"? Past invoices are not affected.`)) return;
+      s.deleted = true; touch('services', s); if (draft) delete draft.items[id];
+      closeModal(); viewServices(); toast('Service deleted');
+    };
+  });
+}
+
+/* ================= SETTINGS ================= */
+function viewSettings() {
+  const s = db.settings;
+  const f = (k, l, extra = '') => `<label>${l}<input id="s_${k}" value="${esc(s[k] ?? '')}" ${extra}></label>`;
+  V.innerHTML = `
+    <section class="card"><h3>Firm details</h3>
+      ${f('firm', 'Firm name')}${f('tagline', 'Tagline')}
+      <label>Address<textarea id="s_address" rows="2">${esc(s.address)}</textarea></label>
+      <div class="row2">${f('email', 'Email', 'type="email"')}${f('phone', 'Phone', 'inputmode="tel"')}</div>
+      ${f('pan', 'PAN', 'maxlength="10" style="text-transform:uppercase;margin-bottom:0"')}</section>
+    <section class="card"><h3>GST</h3>
+      ${f('gstin', 'Our GSTIN <span class="muted">(leave blank → no GST on bills)</span>', 'maxlength="15" style="text-transform:uppercase"')}
+      <div class="row2"><label>Our state<select id="s_state">${stateOpts(s.state)}</select></label>${f('gstRate', 'GST rate %', 'type="number" inputmode="decimal"')}</div>
+      <p class="muted" style="margin:0">Customer in same state → CGST + SGST. Other state → IGST.</p></section>
+    <section class="card"><h3>Invoice</h3>
+      ${f('prefix', 'Invoice number prefix')}
+      <label class="switch" style="margin:4px 0 14px">Show previous balance on bills<input type="checkbox" id="s_showPrev" ${s.showPrev !== false ? 'checked' : ''}><span class="knob"></span></label>
+      <label style="margin:0">Terms &amp; conditions <span class="muted">(one per line)</span><textarea id="s_terms" rows="3">${esc(s.terms)}</textarea></label></section>
+    <section class="card"><h3>Share note <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></h3>
+      <textarea id="s_waMsg" rows="5" style="margin:0">${esc(s.waMsg)}</textarea>
+      <p class="muted" style="margin:8px 0 0">Sent with the PDF when sharing. Leave blank for no note. Use {name} {firm} {no} {date} {amount} {balance}</p></section>
+    <section class="card"><h3>Bank details</h3>
+      ${f('bank', 'Bank &amp; branch')}<div class="row2">${f('acno', 'A/c No.', 'inputmode="numeric" style="margin-bottom:0"')}${f('ifsc', 'IFSC', 'style="text-transform:uppercase;margin-bottom:0"')}</div></section>
+    <button class="btn primary block" id="ss">Save settings</button>
+    <section class="card" style="margin-top:14px" id="syncCard"></section>
+    <p class="muted center">${db.invoices.length} invoices · ${live('customers').length} customers · v${VERSION}</p>
+    <a class="weave" href="https://weavesolution.com/" target="_blank" rel="noopener" title="Weave Solutions"><span>Built by</span><img src="images/weave-logo.png" alt="Weave Solutions"></a>`;
+  $('#ss').onclick = () => {
+    const keys = Object.keys(DEF_SETTINGS).filter(k => $('#s_' + k));
+    keys.forEach(k => { const el = $('#s_' + k); s[k] = el.type === 'checkbox' ? el.checked : el.value.trim(); });
+    s.pan = s.pan.toUpperCase(); s.gstin = s.gstin.toUpperCase(); s.ifsc = s.ifsc.toUpperCase(); s.gstRate = +s.gstRate || 18;
+    if (s.gstin && s.gstin.length !== 15) return toast('GSTIN must be 15 characters');
+    const st = stateByCode(s.gstin.slice(0, 2)); if (s.gstin && st && st !== s.state) { s.state = st; $('#s_state').value = st; toast('State set to ' + st + ' from GSTIN'); }
+    touch('settings', s); toast('Settings saved' + (syncReady() ? ' & syncing' : ''));
+  };
+  paintSyncCard();
+}
+function ago(t) { if (!t) return 'never'; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : fmtDate(new Date(t).toISOString().slice(0, 10)); }
+function paintSyncCard() {
+  const el = $('#syncCard'); if (!el) return;
+  const pend = Object.keys(dev.dirty).length;
+  el.innerHTML = `<h3>Google Sheet sync</h3>
+    <p style="margin:0 0 10px" class="muted"><b class="${lastErr ? 'dr' : 'cr'}">● ${lastErr ? esc(lastErr) : 'Connected'}</b> · last synced ${ago(dev.lastSync)}
+    ${pend ? `<br><b class="dr">${pend} change${pend > 1 ? 's' : ''} waiting to upload</b> – keep internet on and don’t clear app data` : '<br>All data is safe in the Google Sheet'}</p>
+    <button class="btn primary block" id="g_now">Sync now</button>`;
+  $('#g_now').onclick = e => busy(e.currentTarget, 'Syncing…', sync).then(ok => { toast(ok ? 'All data synced' : 'Sync failed – ' + lastErr); paintSyncCard(); });
+}
+
+/* ---------- Device password (first use on each phone) ---------- */
+function lockDevice() { if (!dev.key) return; dev.key = ''; saveDev(); setTimeout(showLock, 0); }
+function showLock() {
+  if ($('#lock')) return;
+  const el = document.createElement('div'); el.id = 'lock';
+  el.innerHTML = `<div class="lock-in"><img src="images/logo.png" alt="" class="lock-logo"><h2>Vaada &amp; Associates</h2><p class="muted">Enter password to set up this device</p>
+    <input id="lockPw" type="password" inputmode="numeric" autocomplete="off" placeholder="Password">
+    <button class="btn primary block" id="lockGo">Unlock</button><p class="muted" id="lockMsg" style="min-height:20px"></p></div>`;
+  document.body.appendChild(el);
+  const go2 = async () => {
+    const pw = $('#lockPw').value.trim(), msg = $('#lockMsg'), btn = $('#lockGo');
+    if (!pw) return;
+    if (navigator.onLine === false) { msg.textContent = 'Connect to internet for the first setup.'; return; }
+    btn.disabled = true; btn.textContent = 'Checking…'; msg.textContent = '';
+    dev.key = pw;
+    // first sync uploads anything on this phone (nothing is lost) and downloads everything from the Sheet
+    if (!dev.lastPull) { ['services', 'customers', 'invoices', 'payments'].forEach(t => db[t].forEach(r => dev.dirty[t + ':' + r.id] = 1)); dev.dirty['settings:settings'] = 1; }
+    saveDev();
+    const ok = await sync();
+    if (ok) { el.remove(); toast('Device ready – all data loaded'); render(); }
+    else { if (/password/i.test(lastErr)) { dev.key = ''; saveDev(); msg.textContent = 'Wrong password'; } else { dev.key = ''; saveDev(); msg.textContent = lastErr; } btn.disabled = false; btn.textContent = 'Unlock'; }
+  };
+  $('#lockGo').onclick = go2;
+  $('#lockPw').onkeydown = e => { if (e.key === 'Enter') go2(); };
+  setTimeout(() => $('#lockPw') && $('#lockPw').focus(), 100);
+}
+
+/* ---------- Start ---------- */
+go('bill');
+setSync(syncReady() ? 'idle' : 'off');
+if (syncReady()) sync(); else showLock();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') softSync(); });
+window.addEventListener('online', () => sync());
+setInterval(() => { if (document.visibilityState === 'visible') softSync(); }, 5 * 60 * 1000);
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>
